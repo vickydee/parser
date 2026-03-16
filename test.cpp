@@ -12,7 +12,7 @@
 #include <vector>
 #include "lexer.h" // Token, LexicalAnalyzer
 
-using namespace std;
+using namespace std; 
 
 struct Rule {
     string lhs;
@@ -82,7 +82,7 @@ void refreshSymbolOrders() {
             if (NTOrder.find(sym) == NTOrder.end()) {
                 NTOrder[sym] = static_cast<int>(NTSorted.size());
                 NTSorted.push_back(sym);
-            }
+            } 
         } else {
             if (TOrder.find(sym) == TOrder.end()) {
                 TOrder[sym] = static_cast<int>(TSorted.size());
@@ -134,7 +134,7 @@ map<string, bool> computeNullable() {
         changed = false;
         for (const Rule& rule : grammarRules) {
             bool allNullable = true;
-            for (const string& symbol : rule.rhs) {
+            for (const string& symbol : rule.rhs) { 
                 // A terminal can never derive epsilon, so the whole RHS fails
                 // immediately unless every symbol is a nullable nonterminal
                 if (!isNT(symbol) || !nullable[symbol]) {
@@ -152,16 +152,8 @@ map<string, bool> computeNullable() {
     return nullable;
 }
 
-map<string, set<string>> computeFirstSets(const map<string, bool>& nullable)
-{
-    // FIRST(A) is the set of terminals that can begin a string derived from A.
-    //
-    // For A -> X1 X2 ...:
-    // - add X1 directly if it is a terminal
-    // - otherwise add FIRST(X1)
-    // - if X1 is nullable, continue to X2, etc.
-    //
-    // We keep iterating until a full pass adds nothing new.
+map<string, set<string>> computeFirstSets(const map<string, bool>& nullable) {
+    // keep iterating until a full pass adds nothing new.
     map<string, set<string>> first;
     for (const string& nt : NTSorted) {
         first[nt] = {};
@@ -205,31 +197,28 @@ map<string, set<string>> computeFirstSets(const map<string, bool>& nullable)
 
 set<string> firstOfSequence(
     const vector<string>& sequence,
-    size_t start_index,
+    size_t start_index, 
     const map<string, bool>& nullable,
     const map<string, set<string>>& first)
 {
     // FOLLOW repeatedly needs FIRST(beta) where beta is the suffix after a
     // nonterminal inside a production. This helper computes that suffix-FIRST.
-    set<string> result;
+    set<string> res;
     for (size_t i = start_index; i < sequence.size(); ++i) {
         const string& symbol = sequence[i];
         if (!isNT(symbol)) {
-            // A terminal ends the search immediately.
+            // T ends the search immediately
             result.insert(symbol);
-            return result;
+            return res;
         }
 
-        // A nonterminal contributes all of its FIRST terminals.
+        // NT -> its FIRST set
         result.insert(first.at(symbol).begin(), first.at(symbol).end());
         if (!nullable.at(symbol)) {
-            // If it is not nullable, the suffix cannot continue past it.
-            return result;
+            return res;
         }
     }
-    // If every remaining symbol is nullable, the suffix contributes no direct
-    // terminal by itself; the caller handles the FOLLOW(LHS) case separately.
-    return result;
+    return res;
 }
 
 map<string, set<string>> computeFollowSets(
@@ -467,10 +456,7 @@ vector<Rule> leftFactorGrammar()
     return rules;
 }
 
-vector<Rule> eliminateLeftRecursion()
-{
-    // The expected project output uses lexicographic order of the original
-    // nonterminals for left-recursion elimination, so we sort them here.
+vector<Rule> eliminateLeftRecursion() {
     vector<string> originalNTs = lhsNTSorted;
     sort(originalNTs.begin(), originalNTs.end());
 
@@ -537,7 +523,7 @@ vector<Rule> eliminateLeftRecursion()
         output_order.push_back(new_nt);
         productions[new_nt] = {};
 
-        // Standard rewrite:
+
         //   Ai  -> beta Ai'
         //   Ai' -> epsilon | alpha Ai'
         //
@@ -552,7 +538,6 @@ vector<Rule> eliminateLeftRecursion()
         }
         productions[ai] = new_ai;
 
-        // Epsilon production: Ai' can stop after consuming zero alpha blocks.
         productions[new_nt].push_back({});
         for (const vector<string>& rhs : alpha) {
             vector<string> updated_rhs = rhs;
@@ -570,9 +555,7 @@ vector<Rule> eliminateLeftRecursion()
     return result;
 }
 
-void printOrderedSymbolSet(const set<string>& symbols, bool include_dollar)
-{
-    // Utility for deterministic set printing using the project's terminal order.
+void printOrderedSymbolSet(const set<string>& symbols, bool include_dollar) {
     bool first_output = true;
     if (include_dollar && symbols.find("$") != symbols.end()) {
         cout << "$";
@@ -589,12 +572,7 @@ void printOrderedSymbolSet(const set<string>& symbols, bool include_dollar)
         first_output = false;
     }
 }
-void readGrammar()
-{
-    // Parse the grammar once and build all metadata needed by every task:
-    // - one Rule per production alternative
-    // - original LHS nonterminal order
-    // - first-appearance order of all symbols
+void readGrammar() {
     grammarRules.clear();
     lhsNTSorted.clear();
     NTSorted.clear();
@@ -691,38 +669,25 @@ void Task4()
 }
 
 // Task 5: left factoring
-void Task5()
-{
+void Task5() {
     printGrammar(leftFactorGrammar());
 }
 
 // Task 6: eliminate left recursion
-void Task6()
-{
+void Task6() {
     printGrammar(eliminateLeftRecursion());
 }
-    
-int main (int argc, char* argv[])
-{
-    int task;
 
-    if (argc < 2)
-    {
+int main (int argc, char* argv[]) {
+    int task;
+    if (argc < 2)  {
         cout << "Error: missing argument\n";
         return 1;
     }
 
-    /*
-       Note that by convention argv[0] is the name of your executable,
-       and the first argument to your program is stored in argv[1]
-     */
-
+    // argv[0] is the name of executable
     task = atoi(argv[1]);
-    
-    readGrammar();  // Reads the input grammar from standard input
-                    // and represent it internally in data structures
-                    // ad described in project 2 presentation file
-
+    readGrammar();
     switch (task) {
         case 1: Task1();
             break;
