@@ -66,11 +66,9 @@ void addSym(const string& symbol) {
 /* after parsing finishes, split symbols into T and NT
  * cannot classify symbols safely until whole grammar is parsed
  * a symbol seen early on a RHS might appear later on some LHS
- * only after all LHS symbols are known can we correctly decide:
- * - in NTSet  => nonterminal
- * - otherwise => terminal
- * replaying symbolOrder at the end preserves first-appearance order
- * while still classifying every symbol correctly
+ * only after all LHS symbols are known can we correctly decide...
+ * * in NTSet  => nonterminal
+ * * otherwise => terminal
  */
 void refreshSymbolOrders() {
     NTSorted.clear();
@@ -130,7 +128,7 @@ map<string, bool> computeNullable() {
 
     bool changed = true;
     while (changed) {
-        // if this discovers at least one new nullable NT, another pass may unlock even more nullable symbols.
+        // if this discovers at least one new nullable NT, another pass may unlock more nullable 
         changed = false;
         for (const Rule& rule : grammarRules) {
             bool allNullable = true;
@@ -161,13 +159,12 @@ map<string, set<string>> computeFirstSets(const map<string, bool>& nullable) {
 
     bool changed = true;
     while (changed) {
-        // FIRST information can propagate through chains like A -> B, B -> C,
-        // C -> a, so we iterate until the sets stop growing.
+        // iterate until the FIRST sets stop growing
         changed = false;
         for (const Rule& rule : grammarRules) {
             for (const string& symbol : rule.rhs) {
                 if (!isNT(symbol)) {
-                    // The first terminal we encounter is the first terminal
+                    // first terminal we encounter is the first terminal
                     // the production can produce, so we add it and stop.
                     if (first[rule.lhs].insert(symbol).second) {
                         changed = true;
@@ -408,10 +405,10 @@ vector<Rule> leftFactorGrammar()
                     }
                 }
                 if (has_prefix) {
-                    // These rules will be replaced by the new factored form.
+                    // These rules will be replaced by the new factored form
                     matching.push_back(rule);
                 } else {
-                    // These rules stay unchanged for this LHS.
+                    // These rules stay unchanged for this LHS
                     remaining.push_back(rule);
                 }
             }
@@ -600,11 +597,8 @@ void readGrammar() {
     refreshSymbolOrders();
 }
 
-/* 
- * Task 1: 
- * Printing the terminals, then nonterminals of grammar in appearing order
- * output is one line, and all names are space delineated
-*/
+// Prints T, then NT in  order
+// output is 1 line, all names are space delineated
 void Task1()
 {
     for (const string& terminal : TSorted) {
@@ -616,10 +610,7 @@ void Task1()
     cout << "\n";
 }
 
-/*
- * Task 2:
- * Print out nullable set of the grammar in specified format.
-*/
+// prints out nullable set of the grammar in specified format
 void Task2()
 {
     map<string, bool> nullable = computeNullable();
@@ -637,7 +628,7 @@ void Task2()
     cout << " }\n";
 }
 
-// Task 3: FIRST sets
+// FIRST sets
 void Task3()
 {
     map<string, bool> nullable = computeNullable();
@@ -652,7 +643,7 @@ void Task3()
     }
 }
 
-// Task 4: FOLLOW sets
+// FOLLOW sets
 void Task4()
 {
     map<string, bool> nullable = computeNullable();
@@ -668,12 +659,12 @@ void Task4()
     }
 }
 
-// Task 5: left factoring
+// left factoring
 void Task5() {
     printGrammar(leftFactorGrammar());
 }
 
-// Task 6: eliminate left recursion
+// eliminate left recursion
 void Task6() {
     printGrammar(eliminateLeftRecursion());
 }
