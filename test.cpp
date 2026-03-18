@@ -205,12 +205,12 @@ set<string> firstOfSequence(
         const string& symbol = sequence[i];
         if (!isNT(symbol)) {
             // T ends the search immediately
-            result.insert(symbol);
+            res.insert(symbol);
             return res;
         }
 
         // NT -> its FIRST set
-        result.insert(first.at(symbol).begin(), first.at(symbol).end());
+        res.insert(first.at(symbol).begin(), first.at(symbol).end());
         if (!nullable.at(symbol)) {
             return res;
         }
